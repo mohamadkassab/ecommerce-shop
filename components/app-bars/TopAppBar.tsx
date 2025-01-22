@@ -66,7 +66,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   width: "100%",
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create("width"),
   },
@@ -96,8 +95,12 @@ function TopAppBar() {
 
   return (
     <AppBar
-      position="static"
-      sx={{ backgroundColor: "transparent", padding: 0 }}
+      position="sticky"  // Change to 'sticky' for a fixed effect
+      sx={{
+        backgroundColor: "white", 
+        backdropFilter: "blur(100px)",  // Apply blur on the bottom
+        padding: 0,
+      }}
     >
       <Container>
         <Toolbar disableGutters>
@@ -108,13 +111,12 @@ function TopAppBar() {
                 sx={{
                   display: "flex",
                   justifyContent: "center",
-                  alignItems: "center",
-                  height: "100px",
-                  width: "100px", 
-                  paddingX: "1rem"
+                  alignItems: "center", 
+                  paddingRight: "1rem",
+                  flexShrink: 0,
                 }}
               >
-                <Image src={adidas} alt="Logo" width={100} height={100} />
+                <Image src={adidas} alt="Logo" width={50} height={50} />
               </Box>
 
               <Box sx={{ flexGrow: 1, display: { xs: "none", sm: "flex" } }}>
@@ -161,7 +163,7 @@ function TopAppBar() {
               </Box>
             </div>
 
-            <div className="flex items-center justify-center grow w-full px-10">
+            <div className="flex items-center justify-center grow w-full px-[4rem]">
               <Search>
                 <SearchIconWrapper>
                   <SearchIcon />
@@ -223,4 +225,6 @@ function TopAppBar() {
     </AppBar>
   );
 }
+
 export default TopAppBar;
+

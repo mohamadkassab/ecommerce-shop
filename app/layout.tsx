@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ThemeProvider, CssBaseline, Box, LinearProgress } from "@mui/material";
+import { ThemeProvider, CssBaseline, Box, LinearProgress, Container } from "@mui/material";
 import StoreProvider from "./StoreProvider";
 import "../styles/globals.css";
 import muiTheme from "@/styles/muiTheme";
@@ -43,8 +43,8 @@ export default function RootLayout({
               return (
                 <>
                 {/* <LinearProgress color="secondary" /> */}
-                  <TopAppBar />
-                  <div className="flex-grow">{children}</div>
+                  <TopAppBar/>
+                  <Container>{children}</Container>
                   <BottomAppBar />
                   <Box
                     sx={{

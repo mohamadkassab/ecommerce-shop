@@ -2,7 +2,7 @@
 import React from "react";
 import { useTheme } from "@mui/material/styles";
 import { Button } from "@mui/material";
-import { globalRadius } from "@/styles/muiTheme";
+import { GLOBALRADIUS } from "@/styles/muiTheme";
 
 interface HeroSectionModel {
   backgroundImage: string; 
@@ -16,7 +16,7 @@ const HeroSection = ({
   const theme = useTheme();
   return (
     <div
-      className="relative flex items-end justify-center"
+      className="relative flex items-end justify-center mt-[1rem] sm:mt-[2rem]"
       style={{
         height: "calc(100vh - 144px)",
         backgroundImage:  `url(data:image/jpeg;base64,${backgroundImage})`,
@@ -24,7 +24,7 @@ const HeroSection = ({
         backgroundColor: `${theme.palette.background.default}`,
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        borderRadius: globalRadius,
+        borderRadius: GLOBALRADIUS,
         overflow: "hidden",
         
       }}

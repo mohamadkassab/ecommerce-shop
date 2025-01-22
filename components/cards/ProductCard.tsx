@@ -4,10 +4,9 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import CardActionArea from "@mui/material/CardActionArea";
-import { globalRadius } from "@/styles/muiTheme";
+import { GLOBALRADIUS } from "@/styles/muiTheme";
 import { Box } from "@mui/material";
 import { ShopProductModel } from "@/models/ShopProductModel";
-import adidas from "@/public/images/adidas.png"
 
 interface ProductCardModel{
   product: ShopProductModel;
@@ -17,14 +16,17 @@ const ProductCard = ({product}: ProductCardModel)=> {
  
   return (
     <div className="flex-shrink-0">
-      <Card sx={{ maxWidth: 345 }}>
+      <Card sx={{ maxWidth: 345, paddingX: {xs: 2, sm: 3}}}>
         <CardActionArea>
           <CardMedia
             component="img"
-            height="140"
-            image={product.media ? `data:image/jpeg;base64,${product.media}` : "/images/product.jpeg"}
+            image={product?.media ? `data:image/jpeg;base64,${product?.media}` : "/images/product.jpeg"}
             alt={product?.name}
-            sx={{ borderRadius: globalRadius, }}
+            sx={{ borderRadius: GLOBALRADIUS,                
+              objectFit: "contain",
+              height: { xs: "150px", sm: "200px",lg: "300px"  },
+              width: { xs: "150px", sm: "200px", lg: "300px"  },
+              flexShrink: 0, }}
           />
           <CardContent sx={{paddingY: 0}}>
             <Typography 

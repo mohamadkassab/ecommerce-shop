@@ -2,7 +2,7 @@
 import { colors } from "@mui/material";
 import { createTheme, Theme, ThemeOptions } from "@mui/material/styles";
 
-export const globalRadius = "8px";
+export const GLOBALRADIUS = "8px";
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -92,7 +92,7 @@ const muiTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: globalRadius,
+          borderRadius: GLOBALRADIUS,
           boxShadow: "none",
           "&:hover": {
             boxShadow: "none",
@@ -103,7 +103,7 @@ const muiTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: globalRadius,
+          borderRadius: GLOBALRADIUS,
         },
       },
     },
@@ -124,9 +124,9 @@ const muiTheme = createTheme({
     MuiTextField: {
       styleOverrides: {
         root: {
-          borderRadius: globalRadius,
+          borderRadius: GLOBALRADIUS,
           "& .MuiInputBase-root": {
-            borderRadius: globalRadius,
+            borderRadius: GLOBALRADIUS,
           },
         },
       },
@@ -144,6 +144,8 @@ const muiTheme = createTheme({
         root: {
           "&:hover": {
             backgroundColor: "#F9FAFB",
+            color:"#23A6F0",
+            fontWeight: "bold",
             "& .MuiLink-root": {
               color:"#23A6F0",
               fontWeight: "bold",
@@ -155,7 +157,7 @@ const muiTheme = createTheme({
     MuiIconButton: {
       styleOverrides: {
         root: {
-          borderRadius: globalRadius,
+          borderRadius: GLOBALRADIUS,
         },
       },
     },
@@ -182,7 +184,7 @@ const muiTheme = createTheme({
       styleOverrides: {
         root: {
           padding: "16px",
-          borderRadius: globalRadius,
+          borderRadius: GLOBALRADIUS,
           boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
         },
       },
@@ -190,7 +192,7 @@ const muiTheme = createTheme({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          borderRadius: globalRadius,
+          borderRadius: GLOBALRADIUS,
           padding: "24px",
         },
       },

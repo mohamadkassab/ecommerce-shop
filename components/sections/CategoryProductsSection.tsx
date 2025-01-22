@@ -1,20 +1,22 @@
-import { Typography, Button, useTheme, useMediaQuery } from "@mui/material";
+"use client"
+import { Typography, Button, useTheme, useMediaQuery, Divider } from "@mui/material";
 import ProductCard from "../cards/ProductCard";
 import React from "react";
 import Slider from "react-slick";
-
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { CategoryProductModel } from "@/models/CategoryProductModel";
 import { ShopProductModel } from "@/models/ShopProductModel";
+import { useRouter } from 'next/navigation'
+import { ROUTES } from "@/utils/constants";
 
-interface ProductSectionModel{
+interface CategoryProductsSectionModel{
  categoryProduct: CategoryProductModel;
  numberOfSlides: number;
 }
 
-const ProductSection = ({categoryProduct, numberOfSlides}: ProductSectionModel) => {
-
+const CategoryProductsSection = ({categoryProduct, numberOfSlides}: CategoryProductsSectionModel) => {
+  const router = useRouter();
   const settings = {
     dots: true,
     infinite: false,
@@ -24,8 +26,8 @@ const ProductSection = ({categoryProduct, numberOfSlides}: ProductSectionModel) 
   };
 
   return (
-    <div className="flex flex-col justify-center w-full gap-x-[1rem]">
-      <div className="flex max-w justify-between items-center w-full">
+    <div className="flex flex-col justify-center w-full gap-x-[1rem] ">
+      <div className="flex justify-between items-center w-full">
         <div className="flex-1"></div>
         <div className="flex-1 flex justify-center">
           <Typography
@@ -41,6 +43,11 @@ const ProductSection = ({categoryProduct, numberOfSlides}: ProductSectionModel) 
           <Button
             size="small"
             variant="outlined"
+            onClick={() => {
+              const categoryId = categoryProduct?.categoryId;
+              const categoryName = categoryProduct?.categoryName;
+              router.push(`${ROUTES.PRODUCTSSEARCH.path}?id=${categoryId}&name=${categoryName}`);
+            }}
             sx={{
               borderColor: "primary.main",
               color: "primary.main",
@@ -57,8 +64,10 @@ const ProductSection = ({categoryProduct, numberOfSlides}: ProductSectionModel) 
       <Slider {...settings}>
         {
           categoryProduct?.products?.map((item: ShopProductModel, index: number) =>{
-            return(
-              <ProductCard  key={index} product={item} />
+            return (
+              <div key={index}>
+                <ProductCard product={item} key={index} />
+              </div>
             );
           })
         }
@@ -67,4 +76,4 @@ const ProductSection = ({categoryProduct, numberOfSlides}: ProductSectionModel) 
   );
 };
 
-export default ProductSection;
+export default CategoryProductsSection;

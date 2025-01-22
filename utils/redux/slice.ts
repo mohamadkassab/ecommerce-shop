@@ -4,13 +4,15 @@ import { ActionReducerMapBuilder, AsyncThunk, PayloadAction } from '@reduxjs/too
 import { StatusModel } from '@/models/StatusModel';
 import { isErrorPayload } from '../helpers/functions';
 import { CategoryProductModel } from '@/models/CategoryProductModel';
-import { getHomePageAssets, getHomePageProductsAndBrands } from './actions/page';
+import { GetHomePageAssets, GetHomePageProductsAndBrands, GetProductsByCategoryAndPage } from './actions/page';
 import { PageAssetsModel } from '@/models/PageAssetsModel';
 import { ProductAndBrandModel } from '@/models/ProductAndBrandModel';
+import { ShopProductModel } from '@/models/ShopProductModel';
 
 interface InitialState {
   homePageProductsAndBrands?: ProductAndBrandModel;
   homePageAssets?: PageAssetsModel;
+  productsSearch? : ShopProductModel[];
   status: StatusModel;
   error: string | null | object;
 }
@@ -81,19 +83,27 @@ const slice = createSlice({
     builder
 
     //+------------------------------------------------------------------+
-    //| Home                                            
+    //| Product Search                                            
     //+------------------------------------------------------------------+
-    handleAsyncActionWithoutSuccess(builder, getHomePageAssets, (state, action) => {
-      if (!action.payload.error) {
-        state.homePageAssets = action.payload || [];
-      }       
-    });
-    handleAsyncActionWithoutSuccess(builder, getHomePageProductsAndBrands, (state, action) => {
-      if (!action.payload.error) {
-        state.homePageProductsAndBrands = action.payload || [];
+    handleAsyncActionWithoutSuccess(builder, GetProductsByCategoryAndPage, (state, action) => {
+      if (!action.payload?.error) {
+        state.productsSearch = action.payload || [];
       }       
     });
 
+    //+------------------------------------------------------------------+
+    //| Home                                            
+    //+------------------------------------------------------------------+
+    handleAsyncActionWithoutSuccess(builder, GetHomePageAssets, (state, action) => {
+      if (!action.payload?.error) {
+        state.homePageAssets = action.payload || [];
+      }       
+    });
+    handleAsyncActionWithoutSuccess(builder, GetHomePageProductsAndBrands, (state, action) => {
+      if (!action.payload?.error) {
+        state.homePageProductsAndBrands = action.payload || [];
+      }       
+    });
   },
 });
 

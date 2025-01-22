@@ -4,7 +4,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { BrandModel } from "@/models/BrandModel";
 import { Margin } from "@mui/icons-material";
-import { globalRadius } from "@/styles/muiTheme";
+import { GLOBALRADIUS } from "@/styles/muiTheme";
 
 interface BrandSectionModel {
   brands: BrandModel[];
@@ -33,8 +33,8 @@ const BrandSection = ({ brands, numberOfSlides }: BrandSectionModel) => {
             onClick={() => handleBrandClick(item)}
             sx={{
               maxWidth: "80px",
-              borderRadius: globalRadius,
-              padding: "1rem",
+              borderRadius: GLOBALRADIUS,
+              padding: {sm: "1rem"},
             }}
           >
             <CardMedia
