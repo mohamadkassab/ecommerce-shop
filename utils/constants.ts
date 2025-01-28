@@ -1,5 +1,6 @@
 export const AUTHTOKEN = "ecommerce_shop_authToken";
 export const GLOBAL_REQUEST_TIMEOUT = 10000;
+export const ITEMS_PER_PAGE = 18;
 
 export const ROUTES = {
   HOME: {
@@ -24,7 +25,7 @@ export const APIROUTES = {
   //+------------------------------------------------------------------+
   //| Product Search                                          
   //+------------------------------------------------------------------+
-  GETPRODUCTSBYCATEGORYANDPAGE: "/Shop/Page/GetProductsByCategoryAndPage",
+  GETPRODUCTSBYQUERY: "/Shop/Page/GetProductsByQuery",
 
   //+------------------------------------------------------------------+
   //| Home                                          

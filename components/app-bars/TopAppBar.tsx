@@ -22,6 +22,7 @@ import Image from "next/image";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useTheme } from "@mui/material/styles";
 import Link from "@mui/material/Link";
+import { useAppSelector } from "@/utils/redux/hooks";
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 const Search = styled("div")(({ theme }) => ({
@@ -72,26 +73,24 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 function TopAppBar() {
+  const { searchValue } = useAppSelector((state: any) => state.reducer);
+  const [currentSearchValue, setCurrentSearchValue] = React.useState("");
   const theme = useTheme();
-  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
-    null
-  );
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
-
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {setAnchorElUser(event.currentTarget);};
+  const handleCloseUserMenu = () => {setAnchorElUser(null);};
   const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const handleClick = (event: any) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const handleClick = (event: any) => {setAnchorEl(event.currentTarget);};
 
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  React.useEffect(()=>{
+    if(searchValue != undefined){
+      setCurrentSearchValue(searchValue);
+    }
+  },[searchValue])
 
   return (
     <AppBar
@@ -169,8 +168,10 @@ function TopAppBar() {
                   <SearchIcon />
                 </SearchIconWrapper>
                 <StyledInputBase
+                  sx={{color: "secondary.dark"}}
                   placeholder="Search…"
                   inputProps={{ "aria-label": "search" }}
+                  value={currentSearchValue}
                 />
               </Search>
             </div>

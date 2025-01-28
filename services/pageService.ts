@@ -1,30 +1,30 @@
 import { APIROUTES } from "@/utils/constants";
-import { apiRequest } from "@/utils/helpers/apiRequest";
+import { ApiRequest } from "@/utils/helpers/apiRequest";
 
 //+------------------------------------------------------------------+
 //| Home
 //+------------------------------------------------------------------+
 export const GetHomePageProductsAndBrandsService = async () =>
-  apiRequest("GET", APIROUTES.GETHOMEPAGEPRODUCTSANDBRANDS);
+  ApiRequest("GET", APIROUTES.GETHOMEPAGEPRODUCTSANDBRANDS);
 export const GetHomePageAssetsService = async () =>
-  apiRequest("GET", APIROUTES.GETHOMEPAGEASSETS);
+  ApiRequest("GET", APIROUTES.GETHOMEPAGEASSETS);
 
 //+------------------------------------------------------------------+
 //| Product Search
 //+------------------------------------------------------------------+
-export const GetProductsByCategoryAndPageService = async ({
-  categoryId,
+export const GetProductsByQueryService = async ({
+  query,
   pageNbr,
   pageSize,
 }: {
-  categoryId: number;
+  query: string;
   pageNbr: number;
   pageSize: number;
 }) => {
-  const params = `${categoryId}/${pageNbr}/${pageSize}`;
-  return await apiRequest(
+  const params = `${query}/${pageNbr}/${pageSize}`;
+  return await ApiRequest(
     "GET",
-    APIROUTES.GETPRODUCTSBYCATEGORYANDPAGE,
+    APIROUTES.GETPRODUCTSBYQUERY,
     null,
     params
   );

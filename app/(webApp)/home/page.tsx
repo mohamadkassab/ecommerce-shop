@@ -13,6 +13,7 @@ import LoadingSkeletonProducts from "@/components/common/LoadingSkeletonProducts
 import {
   GetHomePageAssets,
   GetHomePageProductsAndBrands,
+  SetSearchValue,
 } from "@/utils/redux/actions/page";
 
 export default function Page() {
@@ -27,6 +28,7 @@ export default function Page() {
   ); // Dynamic component
 
   React.useEffect(() => {
+    dispatch(SetSearchValue("")); 
     dispatch(GetHomePageAssets());
     dispatch(GetHomePageProductsAndBrands()); // Dynamic component
   }, []);

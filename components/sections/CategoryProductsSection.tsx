@@ -9,6 +9,8 @@ import { CategoryProductModel } from "@/models/CategoryProductModel";
 import { ShopProductModel } from "@/models/ShopProductModel";
 import { useRouter } from 'next/navigation'
 import { ROUTES } from "@/utils/constants";
+import { useAppDispatch } from "@/utils/redux/hooks";
+import { SetSearchValue } from "@/utils/redux/actions/page";
 
 interface CategoryProductsSectionModel{
  categoryProduct: CategoryProductModel;
@@ -17,6 +19,7 @@ interface CategoryProductsSectionModel{
 
 const CategoryProductsSection = ({categoryProduct, numberOfSlides}: CategoryProductsSectionModel) => {
   const router = useRouter();
+
   const settings = {
     dots: true,
     infinite: false,
@@ -24,6 +27,10 @@ const CategoryProductsSection = ({categoryProduct, numberOfSlides}: CategoryProd
     slidesToShow: numberOfSlides,
     slidesToScroll: numberOfSlides,
   };
+
+  const handleViewMore = (categoryId: Number, categoryName: string)=>{
+    router.push(`${ROUTES.PRODUCTSSEARCH.path}?query=${categoryName}`);
+  }
 
   return (
     <div className="flex flex-col justify-center w-full gap-x-[1rem] ">
@@ -41,13 +48,8 @@ const CategoryProductsSection = ({categoryProduct, numberOfSlides}: CategoryProd
         </div>
         <div className="flex-1 flex justify-end">
           <Button
-            size="small"
             variant="outlined"
-            onClick={() => {
-              const categoryId = categoryProduct?.categoryId;
-              const categoryName = categoryProduct?.categoryName;
-              router.push(`${ROUTES.PRODUCTSSEARCH.path}?id=${categoryId}&name=${categoryName}`);
-            }}
+            onClick={() => {handleViewMore(categoryProduct?.categoryId, categoryProduct?.categoryName);}}
             sx={{
               borderColor: "primary.main",
               color: "primary.main",
@@ -65,8 +67,9 @@ const CategoryProductsSection = ({categoryProduct, numberOfSlides}: CategoryProd
         {
           categoryProduct?.products?.map((item: ShopProductModel, index: number) =>{
             return (
-              <div key={index}>
+              <div key={index} className="m-2 w-64 h-80 flex justify-center items-center">
                 <ProductCard product={item} key={index} />
+
               </div>
             );
           })

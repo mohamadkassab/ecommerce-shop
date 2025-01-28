@@ -35,10 +35,12 @@ const muiTheme = createTheme({
     },
     tertiary: {
       main: '#23856D',
+      dark: '#1A6F57',
       contrastText: '#FFFFFF',
     },
     accent: {
-      main: '#FFC107',
+      main: '#FF9800',
+      dark: '#F57C00',
       contrastText: '#FFFFFF',
     },
     background: {
@@ -92,10 +94,14 @@ const muiTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
+          size:"small",
           borderRadius: GLOBALRADIUS,
           boxShadow: "none",
           "&:hover": {
             boxShadow: "none",
+          },
+          [createTheme().breakpoints.down("sm")]: {
+            fontSize: "0.7rem", 
           },
         },
       },
@@ -197,6 +203,7 @@ const muiTheme = createTheme({
         },
       },
     },
+    
     MuiCssBaseline: {
       styleOverrides: {
         body: {

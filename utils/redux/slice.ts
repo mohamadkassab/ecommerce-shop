@@ -2,17 +2,20 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { ActionReducerMapBuilder, AsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { StatusModel } from '@/models/StatusModel';
-import { isErrorPayload } from '../helpers/functions';
+import { IsErrorPayload } from '../helpers/functions';
 import { CategoryProductModel } from '@/models/CategoryProductModel';
-import { GetHomePageAssets, GetHomePageProductsAndBrands, GetProductsByCategoryAndPage } from './actions/page';
+import { GetHomePageAssets, GetHomePageProductsAndBrands, GetProductsByQuery, SetCurrentPage, SetSearchValue } from './actions/page';
 import { PageAssetsModel } from '@/models/PageAssetsModel';
 import { ProductAndBrandModel } from '@/models/ProductAndBrandModel';
 import { ShopProductModel } from '@/models/ShopProductModel';
+import { SearchProductsModel } from '@/models/SearchProductsModel';
 
 interface InitialState {
   homePageProductsAndBrands?: ProductAndBrandModel;
   homePageAssets?: PageAssetsModel;
-  productsSearch? : ShopProductModel[];
+  searchProducts? : SearchProductsModel;
+  searchValue? : string;
+  currentPage?: number;
   status: StatusModel;
   error: string | null | object;
 }
@@ -37,7 +40,7 @@ const handleAsyncAction = <T>(
     })
     .addCase(action.fulfilled, (state, action) => {
       onSuccess(state, action);
-      if (isErrorPayload(action.payload)) {
+      if (IsErrorPayload(action.payload)) {
         state.error = action.payload?.error?.response?.data?.message || "Failed";
         state.status = StatusModel.FAILED;
       }else{
@@ -62,7 +65,7 @@ const handleAsyncActionWithoutSuccess = <T>(
     })
     .addCase(action.fulfilled, (state, action) => {
       onSuccess(state, action);
-      if (isErrorPayload(action.payload)) {
+      if (IsErrorPayload(action.payload)) {
         state.error = action.payload?.error?.response?.data?.message || "Failed";
         state.status = StatusModel.FAILED;
       }else{
@@ -83,15 +86,6 @@ const slice = createSlice({
     builder
 
     //+------------------------------------------------------------------+
-    //| Product Search                                            
-    //+------------------------------------------------------------------+
-    handleAsyncActionWithoutSuccess(builder, GetProductsByCategoryAndPage, (state, action) => {
-      if (!action.payload?.error) {
-        state.productsSearch = action.payload || [];
-      }       
-    });
-
-    //+------------------------------------------------------------------+
     //| Home                                            
     //+------------------------------------------------------------------+
     handleAsyncActionWithoutSuccess(builder, GetHomePageAssets, (state, action) => {
@@ -104,6 +98,27 @@ const slice = createSlice({
         state.homePageProductsAndBrands = action.payload || [];
       }       
     });
+
+    //+------------------------------------------------------------------+
+    //| Product Search                                            
+    //+------------------------------------------------------------------+
+    handleAsyncActionWithoutSuccess(builder, GetProductsByQuery, (state, action) => {
+      if (!action.payload?.error) {
+        state.searchProducts = action.payload || [];
+      }       
+    });
+
+    //+------------------------------------------------------------------+
+    //| Shared                                          
+    //+------------------------------------------------------------------+
+    handleAsyncActionWithoutSuccess(builder, SetSearchValue, (state, action) => {
+      state.searchValue = action.payload || ""; 
+    });
+
+    handleAsyncActionWithoutSuccess(builder, SetCurrentPage, (state, action) => {
+      state.currentPage = action.payload; 
+    });
+
   },
 });
 

@@ -1,110 +1,134 @@
 import React, { useState } from "react";
 import {
   Box,
-  TextField,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
   Chip,
   Button,
   Modal,
   Typography,
   IconButton,
+  Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { GetUniqueValues } from "@/utils/helpers/functions";
+import { SearchProductsModel } from "@/models/SearchProductsModel";
 
-// Define the types for filters
-interface Filters {
-  priceRange: {
-    low: string;
-    high: string;
-  };
-  brand: string[];
-  category: string[];
+interface FilterModalModel {
+  searchProductsOriginal: SearchProductsModel;
+  setSearchProductsFiltered: any;
 }
 
-const FilterModal: React.FC = () => {
-  // State for filters
-  const [filters, setFilters] = useState<Filters>({
-    priceRange: { low: "", high: "" },
-    brand: [],
-    category: [],
-  });
+interface FilterModel {
+  filterGroup: string;
+  values: string[];
+  selectedValues?: string[];
+}
 
-  // Filter options
-  const brands: string[] = ["Nike", "Adidas", "Puma", "Under Armour"];
-  const categories: string[] = ["Shoes", "Clothing", "Accessories"];
-
-  // Handlers
-  const handlePriceChange = (field: "low" | "high", value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      priceRange: { ...prev.priceRange, [field]: value },
-    }));
-  };
-
-  const handleCheckboxChange = (key: "brand" | "category", value: string) => {
-    if (value === "ALL") {
-      const allSelected =
-        filters[key].length ===
-        (key === "brand" ? brands.length : categories.length);
-      setFilters((prev) => ({
-        ...prev,
-        [key]: allSelected
-          ? []
-          : key === "brand"
-          ? [...brands]
-          : [...categories],
-      }));
-    } else {
-      setFilters((prev) => ({
-        ...prev,
-        [key]: prev[key as "brand" | "category"].includes(value)
-          ? prev[key].filter((item) => item !== value)
-          : [...prev[key], value],
-      }));
-    }
-  };
-
-  const handleClearFilter = (
-    key: "priceRange" | "brand" | "category",
-    value?: string
-  ) => {
-    if (key === "priceRange") {
-      setFilters((prev) => ({ ...prev, priceRange: { low: "", high: "" } }));
-    } else if (value) {
-      setFilters((prev) => ({
-        ...prev,
-        [key]: prev[key as "brand" | "category"].filter(
-          (item) => item !== value
-        ),
-      }));
-    }
-  };
-
-  const clearAllFilters = () => {
-    setFilters({
-      priceRange: { low: "", high: "" },
-      brand: [],
-      category: [],
-    });
-  };
-
-  const isFilterActive =
-    filters.priceRange.low ||
-    filters.priceRange.high ||
-    filters.brand.length > 0 ||
-    filters.category.length > 0;
-
+const FilterModal = ({
+  setSearchProductsFiltered,
+  searchProductsOriginal,
+}: FilterModalModel) => {
   const [open, setOpen] = useState(false);
-
   const handleModalOpen = () => setOpen(true);
   const handleModalClose = () => setOpen(false);
+
+  const sortingOptions: string[] = ["Price: Low to High", "Price: High to Low"];
+  const [sortingOption, setSortingOption] = useState("");
+
+  const [filters, setFilters] = React.useState<FilterModel[]>([]);
+
+  const handleSortingClick = (item: string) => {
+    setSortingOption(item);
+  };
+  const handleSortingDelete = () => {
+    setSortingOption("");
+    setSearchProductsFiltered(searchProductsOriginal?.products);
+  };
+
+  const handleFilterClick = (filterGroup: string, value: string) =>{
+    const updatedFilters = filters?.map((item)=>{
+      if(item.filterGroup === filterGroup){
+        const selectedValues = item.selectedValues || [];
+        if(!item.selectedValues?.includes(value)){
+          return{
+            ...item,
+            selectedValues: [...selectedValues, value],
+          }
+        }
+      }
+      return item;
+    })
+    setFilters(updatedFilters);
+  }
+
+  const handleFilterDelete = (filterGroup: string, value: string) =>{
+    const updatedFilters = filters?.map((item)=>{
+      if(item.filterGroup === filterGroup){
+        const updatedSelectedValues = item.selectedValues?.filter((selectedValue) => selectedValue !== value);
+          return{
+            ...item,
+            selectedValues: [...updatedSelectedValues || []],
+          }
+      }
+      return item;
+    })
+    setFilters(updatedFilters);
+  }
+
+  // Dynamic component
+  const sortAndFilter = () =>{
+    if(searchProductsOriginal?.products?.length > 0){
+
+      let newSortedFilteredProducts ;
+      if (sortingOption === sortingOptions[0]) {
+        newSortedFilteredProducts = [...searchProductsOriginal?.products]?.sort(
+          (a, b) => a.price - b.price
+        );
+      } else if (sortingOption === sortingOptions[1]) {
+        newSortedFilteredProducts = [...searchProductsOriginal?.products]?.sort(
+          (a, b) => b.price - a.price
+        );
+      }else{
+        newSortedFilteredProducts = searchProductsOriginal?.products
+      }
+
+      const filteredProducts = newSortedFilteredProducts?.filter(product => {
+        const brandSortingOptions = filters.find(i =>i.filterGroup === "Brands")
+        const isBrand = (
+          !brandSortingOptions?.selectedValues || 
+          brandSortingOptions?.selectedValues?.length === 0 || 
+          brandSortingOptions?.selectedValues?.includes(product.brand));
+          
+        const categorySortingOptions = filters.find(i =>i.filterGroup === "Categories")
+        const isCategory = (
+          !categorySortingOptions?.selectedValues || 
+          categorySortingOptions?.selectedValues?.length === 0 ||
+          product?.categories?.some(category => categorySortingOptions?.selectedValues?.includes(category))
+        );   
+        return isBrand && isCategory;
+      });
+
+      setSearchProductsFiltered(filteredProducts);
+    }
+  }
+
+  React.useEffect(() => {
+    const uniqueCategories = GetUniqueValues(searchProductsOriginal?.products,"categories");
+    const uniqueBrands = GetUniqueValues(searchProductsOriginal?.products, "brand");
+    const updatedFilters = [
+      { filterGroup: "Categories", values: uniqueCategories },
+      { filterGroup: "Brands", values: uniqueBrands },
+    ];
+    setFilters(updatedFilters);
+  }, [searchProductsOriginal]);
+
+  React.useEffect(()=>{
+    sortAndFilter();
+  },[filters, sortingOption])
 
   return (
     <>
       <Button onClick={handleModalOpen} variant="contained">
-        Filter
+        Sort and Filter
       </Button>
 
       <Modal
@@ -141,140 +165,96 @@ const FilterModal: React.FC = () => {
               top: 0,
               bgcolor: "background.paper",
               zIndex: 100,
-              paddingY: "1rem"
+              paddingY: "1rem",
             }}
           >
-            <Typography variant="h6" component="h2">
-              Filter
+            <Typography variant="h5" component="h2">
+              Sort and Filter
             </Typography>
             <IconButton onClick={handleModalClose} sx={{ p: 0 }}>
               <CloseIcon />
             </IconButton>
           </Box>
 
-          {/* Price Range */}
-          <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-            <TextField
-              label="Low Price"
-              type="number"
-              value={filters.priceRange.low}
-              onChange={(e) => handlePriceChange("low", e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="High Price"
-              type="number"
-              value={filters.priceRange.high}
-              onChange={(e) => handlePriceChange("high", e.target.value)}
-              fullWidth
-            />
-          </Box>
+          <div className="flex flex-col gap-y-4">
+            <div>
+              <Typography variant="h6" component="h2" color="secondary">
+                Sort By
+              </Typography>
+              <Divider />
+              <div className="mt-2 flex gap-x-2 flex-wrap">
 
-          {/* Brand Filter */}
-          <Box sx={{ mb: 3 }}>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={filters.brand.length === brands.length}
-                    onChange={() => handleCheckboxChange("brand", "ALL")}
-                  />
-                }
-                label="All Brands"
-              />
-              {brands.map((brand) => (
-                <FormControlLabel
-                  key={brand}
-                  control={
-                    <Checkbox
-                      checked={filters.brand.includes(brand)}
-                      onChange={() => handleCheckboxChange("brand", brand)}
+
+                {sortingOptions.map((item) => {
+                  if (item === sortingOption) {
+                    return(
+                      <Chip
+                      key={item}
+                      label={`${item}`}
+                      color="primary"
+                      onDelete={() => handleSortingDelete()}
                     />
+                    )
                   }
-                  label={brand}
-                />
-              ))}
-            </FormGroup>
-          </Box>
-
-          {/* Category Filter */}
-          <Box sx={{ mb: 3 }}>
-            <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={filters.category.length === categories.length}
-                    onChange={() => handleCheckboxChange("category", "ALL")}
-                  />
-                }
-                label="All Categories"
-              />
-              {categories.map((category) => (
-                <FormControlLabel
-                  key={category}
-                  control={
-                    <Checkbox
-                      checked={filters.category.includes(category)}
-                      onChange={() =>
-                        handleCheckboxChange("category", category)
-                      }
+                  return (
+                    <Chip
+                      key={item}
+                      label={`${item}`}
+                      color="secondary"
+                      onClick={() => handleSortingClick(item)}
                     />
-                  }
-                  label={category}
-                />
-              ))}
-            </FormGroup>
-          </Box>
+                  );
+                })}
+              </div>
+            </div>
 
-          {/* Active Filters Display */}
-          <Box sx={{ mt: 3 }}>
-            {isFilterActive ? (
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {/* Price Range */}
-                {(filters.priceRange.low || filters.priceRange.high) && (
-                  <Chip
-                    label={`Price: ${filters.priceRange.low || "0"} - ${
-                      filters.priceRange.high || "∞"
-                    }`}
-                    onDelete={() => handleClearFilter("priceRange")}
-                    color="primary"
-                  />
-                )}
-                {/* Brand Filters */}
-                {filters.brand.map((brand) => (
-                  <Chip
-                    key={brand}
-                    label={`Brand: ${brand}`}
-                    onDelete={() => handleClearFilter("brand", brand)}
-                    color="secondary"
-                  />
-                ))}
-                {/* Category Filters */}
-                {filters.category.map((category) => (
-                  <Chip
-                    key={category}
-                    label={`Category: ${category}`}
-                    onDelete={() => handleClearFilter("category", category)}
-                    color="success"
-                  />
-                ))}
-              </Box>
-            ) : (
-              <Box>No filters applied</Box>
-            )}
-          </Box>
-
-          {/* Clear All Button */}
-          {isFilterActive && (
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={clearAllFilters}
-              sx={{ mt: 2 }}
-            >
-              Clear All Filters
-            </Button>
-          )}
+            <div>
+              <Typography variant="h6" component="h2" color="secondary">
+                Filter By
+              </Typography>
+              <Divider />
+              <div className="mt-2 flex flex-col gap-x-2 flex-wrap">
+                {filters?.map((item, index) => {
+                  return (
+                    <div key={index}>
+                      <Typography
+                        variant="body1"
+                        component="h2"
+                        color="secondary"
+                      >
+                        {item?.filterGroup}
+                      </Typography>
+                      <div className="flex gap-x-2 flex-wrap">
+                        {item?.values?.map((value, index) => {
+                          if (
+                            item?.selectedValues?.find((sv) => sv === value)
+                          ) {
+                            return (
+                              <Chip
+                                key={index}
+                                label={`${value}`}
+                                color="primary"
+                                onDelete={() => handleFilterDelete(item?.filterGroup, value)}
+                              />
+                            );
+                          } else {
+                            return (
+                              <Chip
+                                key={index}
+                                label={`${value}`}
+                                color="secondary"
+                                onClick={() => handleFilterClick(item?.filterGroup, value)}
+                              />
+                            );
+                          }
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </Box>
       </Modal>
     </>

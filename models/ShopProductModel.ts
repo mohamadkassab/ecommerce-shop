@@ -16,4 +16,5 @@ export interface ShopProductModel {
     maxOrder: number; 
     media? : File;
     quantity: number; 
+    categories?: string[];
   } 

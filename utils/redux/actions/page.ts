@@ -1,9 +1,11 @@
 import {
   GetHomePageAssetsService,
   GetHomePageProductsAndBrandsService,
-  GetProductsByCategoryAndPageService,
+  GetProductsByQueryService,
 } from "@/services/pageService";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+
+
 
 //+------------------------------------------------------------------+
 //| Home
@@ -26,22 +28,33 @@ export const GetHomePageAssets = createAsyncThunk(
 //+------------------------------------------------------------------+
 //| Product Search
 //+------------------------------------------------------------------+
-export const GetProductsByCategoryAndPage = createAsyncThunk(
-  "GetProductsByCategoryAndPage",
+export const GetProductsByQuery = createAsyncThunk(
+  "GetProductsByQuery",
   async ({
-    categoryId,
+    query,
     pageNbr,
     pageSize,
   }: {
-    categoryId: number;
+    query: string;
     pageNbr: number;
     pageSize: number;
   }) => {
-    const response = await GetProductsByCategoryAndPageService({
-      categoryId: categoryId,
+    const response = await GetProductsByQueryService({
+      query: query,
       pageNbr: pageNbr,
       pageSize: pageSize,
     });
     return response;
   }
 );
+
+//+------------------------------------------------------------------+
+//| Shared
+//+------------------------------------------------------------------+
+export const SetSearchValue = createAsyncThunk('SetSearchValue', async (value: string) => {
+  return value;
+});
+
+export const SetCurrentPage = createAsyncThunk('SetCurrentPage', async (pageNbr: number) => {
+  return pageNbr;
+});
