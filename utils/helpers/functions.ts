@@ -3,6 +3,7 @@ import { AUTHTOKEN } from '../constants';
 import { TokenModel } from '@/models/TokenModel';
 import jwt from 'jsonwebtoken';
 import { ShopProductModel } from '@/models/ShopProductModel';
+import { useMediaQuery, useTheme } from '@mui/material';
 
 export const GetToken = () => {
     return Cookies.get(`${AUTHTOKEN}`);
@@ -26,3 +27,12 @@ export const GetUniqueValues = (products: ShopProductModel[], field: keyof ShopP
   const uniqueValues = Array.from(new Set(allValues));
   return uniqueValues;
 };
+
+export const GetNumberOfSlides = ()=> {
+  const theme = useTheme();
+  const isLg = useMediaQuery(theme.breakpoints.up("lg"));
+  const isMd = useMediaQuery(theme.breakpoints.up("md"));
+  const isSm = useMediaQuery(theme.breakpoints.up("sm"));
+
+  return isLg ? 6 : isMd ? 4 : isSm ? 3 : 2;
+}

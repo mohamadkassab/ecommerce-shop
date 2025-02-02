@@ -18,11 +18,13 @@ import LocalMallIcon from "@mui/icons-material/LocalMall";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import adidas from "@/public/images/adidas.png";
 import Image from "next/image";
-
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useTheme } from "@mui/material/styles";
 import Link from "@mui/material/Link";
-import { useAppSelector } from "@/utils/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks";
+import { GetProductsByQuery, SetSearchQuery } from "@/utils/redux/actions/page";
+import { ITEMS_PER_PAGE, ROUTES } from "@/utils/constants";
+import { useRouter } from "next/navigation";
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 const Search = styled("div")(({ theme }) => ({
@@ -43,11 +45,11 @@ const Search = styled("div")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   transition: "width 0.3s ease",
-  [theme.breakpoints.up("sm")]: {
-    width: "100%",
+  [theme.breakpoints.up("xs")]: {
+    width: "70%",
   },
   [theme.breakpoints.up("md")]: {
-    width: "40%",
+    width: "50%",
   },
 }));
 
@@ -67,50 +69,81 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   width: "100%",
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    paddingLeft: `calc(1em + ${theme.spacing(0)})`,
     transition: theme.transitions.create("width"),
   },
 }));
 
 function TopAppBar() {
-  const { searchValue } = useAppSelector((state: any) => state.reducer);
-  const [currentSearchValue, setCurrentSearchValue] = React.useState("");
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { searchQuery} = useAppSelector((state: any) => state.reducer);
+  const [currentSearchQuery, setCurrentSearchQuery] = React.useState("");
   const theme = useTheme();
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {setAnchorElUser(event.currentTarget);};
-  const handleCloseUserMenu = () => {setAnchorElUser(null);};
+
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const handleClick = (event: any) => {setAnchorEl(event.currentTarget);};
+  const handleClick = (event: any) => {
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  React.useEffect(()=>{
-    if(searchValue != undefined){
-      setCurrentSearchValue(searchValue);
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentSearchQuery(event.target.value);
+  };
+
+  const handleSearchSubmit = (
+    event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLElement>
+  ) => {
+    event.preventDefault();
+    if(currentSearchQuery !== ""){
+        dispatch(SetSearchQuery(currentSearchQuery));
+        dispatch(GetProductsByQuery({
+                    query: currentSearchQuery,
+                    pageNbr: 1,
+                    pageSize: ITEMS_PER_PAGE,
+                  })
+                );
+        router.push(`${ROUTES.PRODUCTSSEARCH.path}`);
     }
-  },[searchValue])
+  };
+
+  React.useEffect(() => {
+    if (searchQuery != undefined) {
+      setCurrentSearchQuery(searchQuery);
+    }
+  }, [searchQuery]);
 
   return (
     <AppBar
-      position="sticky"  // Change to 'sticky' for a fixed effect
+      position="sticky" // Change to 'sticky' for a fixed effect
       sx={{
-        backgroundColor: "white", 
-        backdropFilter: "blur(100px)",  // Apply blur on the bottom
+        backgroundColor: "white",
+        backdropFilter: "blur(100px)", // Apply blur on the bottom
         padding: 0,
       }}
     >
       <Container>
         <Toolbar disableGutters>
           <div className="w-full flex">
-            <div className="hidden sm:flex items-center">
 
+            <div className="hidden sm:flex items-center">
               <Box
                 sx={{
                   display: "flex",
                   justifyContent: "center",
-                  alignItems: "center", 
+                  alignItems: "center",
                   paddingRight: "1rem",
                   flexShrink: 0,
                 }}
@@ -154,27 +187,37 @@ function TopAppBar() {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  height: "60px",
-                  width: "60px", 
+                  height: "50px",
+                  width: "50px",
                 }}
               >
-                <Image src={adidas} alt="Logo" width={60} height={60}/>
+                <Image src={adidas} alt="Logo" width={50} height={50} />
               </Box>
             </div>
 
-            <div className="flex items-center justify-center grow w-full px-[4rem]">
-              <Search>
-                <SearchIconWrapper>
-                  <SearchIcon />
-                </SearchIconWrapper>
-                <StyledInputBase
-                  sx={{color: "secondary.dark"}}
-                  placeholder="Search…"
-                  inputProps={{ "aria-label": "search" }}
-                  value={currentSearchValue}
-                />
-              </Search>
-            </div>
+            <form
+              onSubmit={handleSearchSubmit}
+              className="flex items-center justify-center grow w-full "
+            >
+              <div className="flex items-center justify-center w-full ">
+                <Search>
+                  <IconButton
+                    onClick={handleSearchSubmit}
+                    color="primary"
+                    sx={{ padding: 0.5 }}
+                  >
+                    <SearchIcon />
+                  </IconButton>
+                  <StyledInputBase
+                    sx={{ color: "secondary.dark" }}
+                    placeholder="Search…"
+                    inputProps={{ "aria-label": "search" }}
+                    value={currentSearchQuery}
+                    onChange={handleSearchChange}
+                  />
+                </Search>
+              </div>
+            </form>
 
             <div className="hidden sm:flex gap-[1rem] py-[1rem]">
               <Tooltip title="Cart">
@@ -228,4 +271,3 @@ function TopAppBar() {
 }
 
 export default TopAppBar;
-

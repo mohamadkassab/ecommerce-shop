@@ -34,15 +34,24 @@ export const GetProductsByQuery = createAsyncThunk(
     query,
     pageNbr,
     pageSize,
+    sortingOption,
+    brands,
+    categories
   }: {
     query: string;
     pageNbr: number;
     pageSize: number;
+    sortingOption?: string;
+    brands?: string [];
+    categories?: string [];
   }) => {
     const response = await GetProductsByQueryService({
       query: query,
       pageNbr: pageNbr,
       pageSize: pageSize,
+      sortingOption,
+      brands,
+      categories
     });
     return response;
   }
@@ -51,7 +60,7 @@ export const GetProductsByQuery = createAsyncThunk(
 //+------------------------------------------------------------------+
 //| Shared
 //+------------------------------------------------------------------+
-export const SetSearchValue = createAsyncThunk('SetSearchValue', async (value: string) => {
+export const SetSearchQuery = createAsyncThunk('SetSearchQuery', async (value: string) => {
   return value;
 });
 

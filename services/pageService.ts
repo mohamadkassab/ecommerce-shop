@@ -1,13 +1,13 @@
 import { APIROUTES } from "@/utils/constants";
-import { ApiRequest } from "@/utils/helpers/apiRequest";
+import { ApiRequestSearchParams } from "@/utils/helpers/apiRequest";
 
 //+------------------------------------------------------------------+
 //| Home
 //+------------------------------------------------------------------+
 export const GetHomePageProductsAndBrandsService = async () =>
-  ApiRequest("GET", APIROUTES.GETHOMEPAGEPRODUCTSANDBRANDS);
+  ApiRequestSearchParams("GET", APIROUTES.GETHOMEPAGEPRODUCTSANDBRANDS);
 export const GetHomePageAssetsService = async () =>
-  ApiRequest("GET", APIROUTES.GETHOMEPAGEASSETS);
+  ApiRequestSearchParams("GET", APIROUTES.GETHOMEPAGEASSETS);
 
 //+------------------------------------------------------------------+
 //| Product Search
@@ -16,13 +16,33 @@ export const GetProductsByQueryService = async ({
   query,
   pageNbr,
   pageSize,
+  sortingOption,
+  brands,
+  categories
 }: {
   query: string;
   pageNbr: number;
   pageSize: number;
+  sortingOption?: string;
+  brands?: string [];
+  categories?: string [];
 }) => {
-  const params = `${query}/${pageNbr}/${pageSize}`;
-  return await ApiRequest(
+
+  const params = new URLSearchParams({
+    Query: query,
+    PageNbr: pageNbr.toString(),
+    PageSize: pageSize.toString(), 
+    SortingOption: sortingOption || "",
+  });
+
+  if(brands && brands?.length > 0){
+    brands.forEach(option => params.append("Brands", option));
+  }
+  if(categories && categories?.length > 0){
+    categories.forEach(option => params.append("Categories", option));
+  }
+  
+  return await ApiRequestSearchParams(
     "GET",
     APIROUTES.GETPRODUCTSBYQUERY,
     null,

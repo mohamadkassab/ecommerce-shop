@@ -1,31 +1,30 @@
-import { useState, useEffect } from "react";
 import { ShopProductModel } from "@/models/ShopProductModel";
 import ProductCard from "../cards/ProductCard";
 import { Pagination } from "@mui/material";
 import React from "react";
-import { SearchProductsModel } from "@/models/SearchProductsModel";
 import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks";
 import { GetProductsByQuery, SetCurrentPage } from "@/utils/redux/actions/page";
 import { ITEMS_PER_PAGE } from "@/utils/constants";
 
-interface ProductSectionModel {
-  products: ShopProductModel[];
-  totalProducts: number;
-  query: string;
-}
-
 const itemsPerPage = ITEMS_PER_PAGE; 
 
-const ProductSection = ({ products, totalProducts, query }: ProductSectionModel) => {
+const ProductSection = () => {
   const dispatch = useAppDispatch();
-  const { searchProducts, currentPage } = useAppSelector((state: any) => state.reducer);
+  const { searchProducts, currentPage, searchQuery } = useAppSelector((state: any) => state.reducer);
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     value: number
   ) => {
     dispatch(SetCurrentPage(value));
-    dispatch(GetProductsByQuery({query: query, pageNbr: value, pageSize: ITEMS_PER_PAGE}))
+    dispatch(GetProductsByQuery({
+      query: searchQuery,
+      pageNbr: value,
+      pageSize: ITEMS_PER_PAGE,
+      sortingOption: searchProducts?.selectedFilterSort?.sortingOption,
+      brands: searchProducts?.selectedFilterSort?.brands,
+      categories: searchProducts?.selectedFilterSort?.categories,  
+    }))
   };
 
   return (
@@ -41,7 +40,7 @@ const ProductSection = ({ products, totalProducts, query }: ProductSectionModel)
       {searchProducts?.products?.length > 0 && (
         <div className="mt-4">
           <Pagination
-            count={Math.ceil(totalProducts / itemsPerPage)}
+            count={Math.ceil(searchProducts?.totalProducts / itemsPerPage)}
             page={currentPage}
             onChange={handlePageChange}
             color="secondary"

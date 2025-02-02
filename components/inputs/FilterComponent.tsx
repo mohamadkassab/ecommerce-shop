@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import {
   Box,
@@ -9,121 +10,77 @@ import {
   Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { GetUniqueValues } from "@/utils/helpers/functions";
-import { SearchProductsModel } from "@/models/SearchProductsModel";
+import { useAppDispatch, useAppSelector } from "@/utils/redux/hooks";
+import { ITEMS_PER_PAGE } from "@/utils/constants";
+import { GetProductsByQuery } from "@/utils/redux/actions/page";
 
-interface FilterModalModel {
-  searchProductsOriginal: SearchProductsModel;
-  setSearchProductsFiltered: any;
-}
-
-interface FilterModel {
-  filterGroup: string;
-  values: string[];
-  selectedValues?: string[];
-}
-
-const FilterModal = ({
-  setSearchProductsFiltered,
-  searchProductsOriginal,
-}: FilterModalModel) => {
+const FilterModal = () => {
+  const dispatch = useAppDispatch();
+  const { searchProducts, status, searchQuery } = useAppSelector((state: any) => state.reducer);
   const [open, setOpen] = useState(false);
   const handleModalOpen = () => setOpen(true);
   const handleModalClose = () => setOpen(false);
+  const [filters, setFilters] = React.useState<FilterSortModel>({
+    sortingOption: "",
+    brands: [],
+    categories: [],
+  });
 
-  const sortingOptions: string[] = ["Price: Low to High", "Price: High to Low"];
-  const [sortingOption, setSortingOption] = useState("");
-
-  const [filters, setFilters] = React.useState<FilterModel[]>([]);
-
+  const handleResetFilter = () => {
+    dispatch(
+      GetProductsByQuery({
+        query: searchQuery,
+        pageNbr: 1,
+        pageSize: ITEMS_PER_PAGE,
+      })
+    );
+  };
+  const handleApplyFilter = () =>{
+    dispatch(
+      GetProductsByQuery({
+        query: searchQuery,
+        pageNbr: 1,
+        pageSize: ITEMS_PER_PAGE,
+        sortingOption: filters.sortingOption,
+        brands: filters.brands,
+        categories: filters.categories,
+      })
+    );
+  };
   const handleSortingClick = (item: string) => {
-    setSortingOption(item);
+    setFilters((current) =>({
+      ...current,
+      sortingOption: item,
+    }))
   };
   const handleSortingDelete = () => {
-    setSortingOption("");
-    setSearchProductsFiltered(searchProductsOriginal?.products);
+    setFilters((current) =>({
+      ...current,
+      sortingOption: "",
+    }))
+  };
+  const handleFilterClick = (key: keyof FilterSortModel, value: string) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [key]: prevFilters[key] ? [...prevFilters[key], value] : [value],
+    }));
+  };
+  const handleFilterDelete = (key: keyof FilterSortModel, value: string) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [key]: Array.isArray(prevFilters[key])
+        ? prevFilters[key].filter((item) => item !== value)
+        : prevFilters[key],
+    }));
   };
 
-  const handleFilterClick = (filterGroup: string, value: string) =>{
-    const updatedFilters = filters?.map((item)=>{
-      if(item.filterGroup === filterGroup){
-        const selectedValues = item.selectedValues || [];
-        if(!item.selectedValues?.includes(value)){
-          return{
-            ...item,
-            selectedValues: [...selectedValues, value],
-          }
-        }
-      }
-      return item;
-    })
-    setFilters(updatedFilters);
-  }
-
-  const handleFilterDelete = (filterGroup: string, value: string) =>{
-    const updatedFilters = filters?.map((item)=>{
-      if(item.filterGroup === filterGroup){
-        const updatedSelectedValues = item.selectedValues?.filter((selectedValue) => selectedValue !== value);
-          return{
-            ...item,
-            selectedValues: [...updatedSelectedValues || []],
-          }
-      }
-      return item;
-    })
-    setFilters(updatedFilters);
-  }
-
-  // Dynamic component
-  const sortAndFilter = () =>{
-    if(searchProductsOriginal?.products?.length > 0){
-
-      let newSortedFilteredProducts ;
-      if (sortingOption === sortingOptions[0]) {
-        newSortedFilteredProducts = [...searchProductsOriginal?.products]?.sort(
-          (a, b) => a.price - b.price
-        );
-      } else if (sortingOption === sortingOptions[1]) {
-        newSortedFilteredProducts = [...searchProductsOriginal?.products]?.sort(
-          (a, b) => b.price - a.price
-        );
-      }else{
-        newSortedFilteredProducts = searchProductsOriginal?.products
-      }
-
-      const filteredProducts = newSortedFilteredProducts?.filter(product => {
-        const brandSortingOptions = filters.find(i =>i.filterGroup === "Brands")
-        const isBrand = (
-          !brandSortingOptions?.selectedValues || 
-          brandSortingOptions?.selectedValues?.length === 0 || 
-          brandSortingOptions?.selectedValues?.includes(product.brand));
-          
-        const categorySortingOptions = filters.find(i =>i.filterGroup === "Categories")
-        const isCategory = (
-          !categorySortingOptions?.selectedValues || 
-          categorySortingOptions?.selectedValues?.length === 0 ||
-          product?.categories?.some(category => categorySortingOptions?.selectedValues?.includes(category))
-        );   
-        return isBrand && isCategory;
-      });
-
-      setSearchProductsFiltered(filteredProducts);
-    }
-  }
-
   React.useEffect(() => {
-    const uniqueCategories = GetUniqueValues(searchProductsOriginal?.products,"categories");
-    const uniqueBrands = GetUniqueValues(searchProductsOriginal?.products, "brand");
-    const updatedFilters = [
-      { filterGroup: "Categories", values: uniqueCategories },
-      { filterGroup: "Brands", values: uniqueBrands },
-    ];
-    setFilters(updatedFilters);
-  }, [searchProductsOriginal]);
-
-  React.useEffect(()=>{
-    sortAndFilter();
-  },[filters, sortingOption])
+    setFilters({
+      sortingOption: searchProducts?.selectedFilterSortOptions?.sortingOption,
+      brands: searchProducts?.selectedFilterSortOptions?.brands,
+      categories: searchProducts?.selectedFilterSortOptions?.categories,
+    });
+  }, [searchProducts]);
 
   return (
     <>
@@ -156,55 +113,59 @@ const FilterModal = ({
             overflow: "auto",
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              position: "sticky",
-              top: 0,
-              bgcolor: "background.paper",
-              zIndex: 100,
-              paddingY: "1rem",
-            }}
-          >
-            <Typography variant="h5" component="h2">
-              Sort and Filter
-            </Typography>
-            <IconButton onClick={handleModalClose} sx={{ p: 0 }}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
+          <div className="w-full flex justify-end pt-4">
+            <div className="flex gap-x-4">
+            <Button onClick={handleApplyFilter} variant="contained" color="primary">
+                Apply
+              </Button>
+
+              <Button onClick={handleResetFilter} variant="contained" color="secondary">
+                Reset
+              </Button>
+
+              <IconButton onClick={handleModalClose} sx={{ p: 0 }}>
+                <CloseIcon />
+              </IconButton>
+            </div>
+          </div>
 
           <div className="flex flex-col gap-y-4">
             <div>
-              <Typography variant="h6" component="h2" color="secondary">
-                Sort By
-              </Typography>
+              <div className="w-full flex justify-between">
+                <div className="flex items-center">
+                  <Typography variant="h6" component="h2" color="secondary">
+                    Sort By
+                  </Typography>
+                </div>
+              </div>
               <Divider />
               <div className="mt-2 flex gap-x-2 flex-wrap">
-
-
-                {sortingOptions.map((item) => {
-                  if (item === sortingOption) {
-                    return(
+                {searchProducts?.filterSortOptions?.sortingOptions?.map(
+                  (sortingOptions: Record<string, string>) => {
+                    const [sortingKey, sortingDescription] = Object.entries(sortingOptions)[0];
+                    if (
+                      sortingKey ===
+                      filters?.sortingOption
+                    ) {
+                      return (
+                        <Chip
+                          key={sortingKey}
+                          label={`${sortingDescription}`}
+                          color="primary"
+                          onDelete={() => handleSortingDelete()}
+                        />
+                      );
+                    }
+                    return (
                       <Chip
-                      key={item}
-                      label={`${item}`}
-                      color="primary"
-                      onDelete={() => handleSortingDelete()}
-                    />
-                    )
+                        key={sortingKey}
+                        label={`${sortingDescription}`}
+                        color="secondary"
+                        onClick={() => handleSortingClick(sortingKey)}
+                      />
+                    );
                   }
-                  return (
-                    <Chip
-                      key={item}
-                      label={`${item}`}
-                      color="secondary"
-                      onClick={() => handleSortingClick(item)}
-                    />
-                  );
-                })}
+                )}
               </div>
             </div>
 
@@ -213,45 +174,99 @@ const FilterModal = ({
                 Filter By
               </Typography>
               <Divider />
-              <div className="mt-2 flex flex-col gap-x-2 flex-wrap">
-                {filters?.map((item, index) => {
-                  return (
-                    <div key={index}>
-                      <Typography
-                        variant="body1"
-                        component="h2"
-                        color="secondary"
-                      >
-                        {item?.filterGroup}
-                      </Typography>
-                      <div className="flex gap-x-2 flex-wrap">
-                        {item?.values?.map((value, index) => {
-                          if (
-                            item?.selectedValues?.find((sv) => sv === value)
-                          ) {
-                            return (
-                              <Chip
-                                key={index}
-                                label={`${value}`}
-                                color="primary"
-                                onDelete={() => handleFilterDelete(item?.filterGroup, value)}
-                              />
-                            );
-                          } else {
-                            return (
-                              <Chip
-                                key={index}
-                                label={`${value}`}
-                                color="secondary"
-                                onClick={() => handleFilterClick(item?.filterGroup, value)}
-                              />
-                            );
-                          }
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
+
+              <div className="mt-2 flex flex-col gap-x-2 gap-y-2 flex-wrap">
+                {/* Brands */}
+                <div>
+                  <Typography variant="body1" component="h2" color="secondary">
+                    {`Brands`}
+                  </Typography>
+                  <div className="flex gap-x-2 flex-wrap">
+                    {searchProducts?.filterSortOptions?.brands?.map(
+                      (brand: string, index: number) => {
+                        if (
+                          filters?.brands?.find(
+                            (v: string) => v === brand
+                          )
+                        ) {
+                          return (
+                            <Chip
+                              key={index}
+                              label={`${brand}`}
+                              color="primary"
+                              onDelete={() =>
+                                handleFilterDelete(
+                                  "brands" as keyof FilterSortModel,
+                                  brand
+                                )
+                              }
+                            />
+                          );
+                        } else {
+                          return (
+                            <Chip
+                              key={index}
+                              label={`${brand}`}
+                              color="secondary"
+                              onClick={() =>
+                                handleFilterClick(
+                                  "brands" as keyof FilterSortModel,
+                                  brand
+                                )
+                              }
+                            />
+                          );
+                        }
+                      }
+                    )}
+                  </div>
+                </div>
+
+                {/* Categories */}
+                <div>
+                  <Typography variant="body1" component="h2" color="secondary">
+                    {`Categories`}
+                  </Typography>
+                  <div className="flex gap-x-2 flex-wrap">
+                    {searchProducts?.filterSortOptions?.categories?.map(
+                      (category: string, index: number) => {
+                        if (
+                          filters?.categories?.find(
+                            (v: string) => v === category
+                          )
+                        ) {
+                          return (
+                            <Chip
+                              key={index}
+                              label={`${category}`}
+                              color="primary"
+                              onDelete={() =>
+                                handleFilterDelete(
+                                  "categories" as keyof FilterSortModel,
+                                  category
+                                )
+                              }
+                            />
+                          );
+                        } else {
+                          return (
+                            <Chip
+                              key={index}
+                              label={`${category}`}
+                              color="secondary"
+                              onClick={() =>
+                                handleFilterClick(
+                                  "categories" as keyof FilterSortModel,
+                                  category
+                                )
+                              }
+                            />
+                          );
+                        }
+                      }
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

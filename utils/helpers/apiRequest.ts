@@ -11,16 +11,15 @@ import { GetToken } from './functions';
  * @param {Record<string, string>} [headers] - Additional headers (optional).
  * @returns {Promise<any>} - API response or error object.
  */
-export const ApiRequest = async (method: Method, url: string, data?: any, params?: string, headers: Record<string, string> = {}) => {
+export const ApiRequestSearchParams = async (method: Method, url: string, data?: any, params?: URLSearchParams) => {
   try {
     const token = GetToken();
     const config: AxiosRequestConfig = {
       method,
-      url: params ? `${process.env.NEXT_PUBLIC_API_URL}${url}/${params}` : `${process.env.NEXT_PUBLIC_API_URL}${url}`,
+      url: params ? `${process.env.NEXT_PUBLIC_API_URL}${url}?${params}` : `${process.env.NEXT_PUBLIC_API_URL}${url}`,
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        ...headers,
       },
       timeout: GLOBAL_REQUEST_TIMEOUT,
       ...(data && { data }),

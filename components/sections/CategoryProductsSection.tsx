@@ -8,9 +8,9 @@ import "slick-carousel/slick/slick-theme.css";
 import { CategoryProductModel } from "@/models/CategoryProductModel";
 import { ShopProductModel } from "@/models/ShopProductModel";
 import { useRouter } from 'next/navigation'
-import { ROUTES } from "@/utils/constants";
+import { ITEMS_PER_PAGE, ROUTES } from "@/utils/constants";
 import { useAppDispatch } from "@/utils/redux/hooks";
-import { SetSearchValue } from "@/utils/redux/actions/page";
+import { GetProductsByQuery, SetSearchQuery } from "@/utils/redux/actions/page";
 
 interface CategoryProductsSectionModel{
  categoryProduct: CategoryProductModel;
@@ -19,7 +19,7 @@ interface CategoryProductsSectionModel{
 
 const CategoryProductsSection = ({categoryProduct, numberOfSlides}: CategoryProductsSectionModel) => {
   const router = useRouter();
-
+  const dispatch = useAppDispatch();
   const settings = {
     dots: true,
     infinite: false,
@@ -28,8 +28,15 @@ const CategoryProductsSection = ({categoryProduct, numberOfSlides}: CategoryProd
     slidesToScroll: numberOfSlides,
   };
 
-  const handleViewMore = (categoryId: Number, categoryName: string)=>{
-    router.push(`${ROUTES.PRODUCTSSEARCH.path}?query=${categoryName}`);
+  const handleViewMore = (categoryName: string)=>{
+    dispatch(SetSearchQuery(categoryName));
+    dispatch(GetProductsByQuery({
+               query: categoryName,
+               pageNbr: 1,
+               pageSize: ITEMS_PER_PAGE,
+             })
+           );
+    router.push(`${ROUTES.PRODUCTSSEARCH.path}`);
   }
 
   return (
@@ -49,7 +56,7 @@ const CategoryProductsSection = ({categoryProduct, numberOfSlides}: CategoryProd
         <div className="flex-1 flex justify-end">
           <Button
             variant="outlined"
-            onClick={() => {handleViewMore(categoryProduct?.categoryId, categoryProduct?.categoryName);}}
+            onClick={() => {handleViewMore(categoryProduct?.categoryName);}}
             sx={{
               borderColor: "primary.main",
               color: "primary.main",
@@ -69,7 +76,6 @@ const CategoryProductsSection = ({categoryProduct, numberOfSlides}: CategoryProd
             return (
               <div key={index} className="m-2 w-64 h-80 flex justify-center items-center">
                 <ProductCard product={item} key={index} />
-
               </div>
             );
           })

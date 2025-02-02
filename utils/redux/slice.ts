@@ -4,7 +4,7 @@ import { ActionReducerMapBuilder, AsyncThunk, PayloadAction } from '@reduxjs/too
 import { StatusModel } from '@/models/StatusModel';
 import { IsErrorPayload } from '../helpers/functions';
 import { CategoryProductModel } from '@/models/CategoryProductModel';
-import { GetHomePageAssets, GetHomePageProductsAndBrands, GetProductsByQuery, SetCurrentPage, SetSearchValue } from './actions/page';
+import { GetHomePageAssets, GetHomePageProductsAndBrands, GetProductsByQuery, SetCurrentPage, SetSearchQuery } from './actions/page';
 import { PageAssetsModel } from '@/models/PageAssetsModel';
 import { ProductAndBrandModel } from '@/models/ProductAndBrandModel';
 import { ShopProductModel } from '@/models/ShopProductModel';
@@ -14,7 +14,7 @@ interface InitialState {
   homePageProductsAndBrands?: ProductAndBrandModel;
   homePageAssets?: PageAssetsModel;
   searchProducts? : SearchProductsModel;
-  searchValue? : string;
+  searchQuery? : string;
   currentPage?: number;
   status: StatusModel;
   error: string | null | object;
@@ -111,8 +111,8 @@ const slice = createSlice({
     //+------------------------------------------------------------------+
     //| Shared                                          
     //+------------------------------------------------------------------+
-    handleAsyncActionWithoutSuccess(builder, SetSearchValue, (state, action) => {
-      state.searchValue = action.payload || ""; 
+    handleAsyncActionWithoutSuccess(builder, SetSearchQuery, (state, action) => {
+      state.searchQuery = action.payload || ""; 
     });
 
     handleAsyncActionWithoutSuccess(builder, SetCurrentPage, (state, action) => {

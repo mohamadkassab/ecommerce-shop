@@ -1,6 +1,9 @@
+"use client";
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import { useMediaQuery, useTheme } from "@mui/material";
+import { GetNumberOfSlides } from "@/utils/helpers/functions";
 
 interface MediaProps {
   itemCount: number;
@@ -39,16 +42,11 @@ function Media({ itemCount }: MediaProps) {
   );
 }
 
-interface LoadingSkeletonProductsProps {
-  itemCount: number;
-}
-
-export default function LoadingSkeletonProducts({
-  itemCount,
-}: LoadingSkeletonProductsProps) {
+export default function LoadingSkeletonProducts() {
+  const numberOfSlides = GetNumberOfSlides();
   return (
     <Box sx={{ overflow: "hidden" }}>
-      <Media itemCount={itemCount} />
+      <Media itemCount={numberOfSlides} />
     </Box>
   );
 }

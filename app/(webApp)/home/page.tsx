@@ -13,22 +13,19 @@ import LoadingSkeletonProducts from "@/components/common/LoadingSkeletonProducts
 import {
   GetHomePageAssets,
   GetHomePageProductsAndBrands,
-  SetSearchValue,
+  SetSearchQuery,
 } from "@/utils/redux/actions/page";
+import { GetNumberOfSlides } from "@/utils/helpers/functions";
 
 export default function Page() {
   const dispatch = useAppDispatch();
-  const theme = useTheme();
-  const isLg = useMediaQuery(theme.breakpoints.up("lg"));
-  const isMd = useMediaQuery(theme.breakpoints.up("md"));
-  const isSm = useMediaQuery(theme.breakpoints.up("sm"));
-  const numberOfSlides = isMd ? 4 : isSm ? 3 : 2;
+  const numberOfSlides = GetNumberOfSlides();
   const { homePageProductsAndBrands, homePageAssets, status } = useAppSelector(
     (state: any) => state.reducer
   ); // Dynamic component
 
   React.useEffect(() => {
-    dispatch(SetSearchValue("")); 
+    dispatch(SetSearchQuery("")); 
     dispatch(GetHomePageAssets());
     dispatch(GetHomePageProductsAndBrands()); // Dynamic component
   }, []);
@@ -42,7 +39,7 @@ export default function Page() {
       <FeatureSection />
 
       {status === StatusModel.LOADING && (
-        <LoadingSkeletonProducts itemCount={numberOfSlides} />
+        <LoadingSkeletonProducts/>
       )}
 
       {status != StatusModel.LOADING && homePageProductsAndBrands?.categories?.map(
